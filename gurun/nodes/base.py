@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Union
 
 
-class Node(object):
+class Node:
     def __init__(
         self,
         name: str = None,
