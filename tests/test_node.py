@@ -1,6 +1,15 @@
 import pytest
 
-from gurun.node import BranchNode, ConstantNode, Node, NodeSequence, NodeSet, NullNode, UnionNode, WrapperNode
+from gurun.node import (
+    BranchNode,
+    ConstantNode,
+    Node,
+    NodeSequence,
+    NodeSet,
+    NullNode,
+    UnionNode,
+    WrapperNode,
+)
 
 
 def test_node():
@@ -20,6 +29,7 @@ def test_null_node():
     assert node.output is None
 
     assert node() is None
+
 
 def test_constant_node():
     node = ConstantNode(default_output=10)
@@ -85,9 +95,10 @@ def test_node_set_add_node():
     assert node.state is True
     assert len(node.nodes) == 3
 
+
 def test_node_sequence():
     node = NodeSequence()
-    
+
     node.add_node(NullNode())
     node.add_node(ConstantNode(default_output=10))
     node.add_node(lambda x: x + 1)
@@ -100,14 +111,20 @@ def test_node_sequence_with_exception():
         raise Exception("Test")
 
     node = NodeSequence()
-    
+
     node.add_node(NullNode())
     node.add_node(f)
 
     assert node(1) is None
 
+
 def test_union_node():
-    node = UnionNode().add_node(NullNode()).add_node(lambda x: x + 1).add_node(lambda x: x + 2, "TestNode")
+    node = (
+        UnionNode()
+        .add_node(NullNode())
+        .add_node(lambda x: x + 1)
+        .add_node(lambda x: x + 2, "TestNode")
+    )
 
     assert node(1) == {"WrapperNode": 2, "TestNode": 3}
 
@@ -133,8 +150,13 @@ def test_union_node_with_exception():
     assert node(1) is None
     assert node.state is False
 
+
 def test_branch_node():
-    node = BranchNode(NullNode(), positive=ConstantNode(default_output=True), negative=ConstantNode(default_output=False))
+    node = BranchNode(
+        NullNode(),
+        positive=ConstantNode(default_output=True),
+        negative=ConstantNode(default_output=False),
+    )
 
     assert node() == True
     assert node.trigger.state is True
@@ -147,6 +169,7 @@ def test_branch_node():
     assert node.trigger.state is False
     assert node.output == node.negative.output
     assert node.state is True
+
 
 def test_branch_node_with_wrappers():
     node = BranchNode(lambda x: x, positive=lambda x: x + 1, negative=lambda x: x - 1)

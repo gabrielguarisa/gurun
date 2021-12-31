@@ -4,9 +4,9 @@ from typing import Any, Callable, List, Union
 class Node:
     def __init__(
         self,
-        name: str = None,
-        default_state: bool = True,
         default_output: Any = None,
+        default_state: bool = True,
+        name: str = None,
         *args: Any,
         **kwargs: Any,
     ):
@@ -38,6 +38,7 @@ class Node:
 class NullNode(Node):
     def __call__(self, *args: Any, **kwargs: Any) -> None:
         return None
+
 
 class ConstantNode(Node):
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
@@ -149,7 +150,6 @@ class UnionNode(NodeSequence):
     ):
         super().__init__(nodes=nodes, *args, **kwargs)
         self.return_node_names = return_node_names
-
 
     @property
     def return_node_names(self) -> List[Node]:
