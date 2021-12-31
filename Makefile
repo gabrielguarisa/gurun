@@ -30,12 +30,12 @@ check-codestyle:
 
 check-formatting: check-codestyle
 
-.PHONY: test
-test:
+.PHONY: tests
+tests:
 	poetry run pytest --cov-report term-missing --cov=gurun tests/
 
 .PHONY: lint
-lint: test check-codestyle
+lint: tests check-codestyle
 
 #* Cleaning
 .PHONY: remove-pycache
