@@ -11,6 +11,12 @@ Framework de autotomação de tarefas
 
 </div>
 
+## Installation
+
+```bash
+pip install gurun
+```
+
 ## Development
 ### Setting up a development environment
 
