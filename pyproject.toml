@@ -29,7 +29,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-
+numpy = "^1.21.4"
+opencv-python = {version = "^4.5.4", optional = true}
+PyAutoGUI = {version = "^0.9.41", optional = true}
+mss = {version = "^6.1.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = { version = "^21.7b0", allow-prereleases = true }
@@ -38,6 +41,9 @@ pre-commit = "^2.13.0"
 pytest = "^6.2.4"
 pytest-cov = "^2.12.1"
 pyupgrade = "^2.23.1"
+
+[tool.poetry.extras]
+gui = ["opencv-python", "PyAutoGUI", "mss"]
 
 [tool.black]
 # https://github.com/psf/black
