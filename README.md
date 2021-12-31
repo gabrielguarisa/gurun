@@ -11,7 +11,8 @@ Framework de autotomação de tarefas
 
 </div>
 
-## Setting up a development environment
+## Development
+### Setting up a development environment
 
 If you don't have a local development environment, you can follow these steps to set one up.
 
@@ -27,12 +28,12 @@ Now, initialize poetry and [pre-commit](https://pre-commit.com/) hooks:
 make install && make install-pre-commit
 ```
 
-### Running the tests
+### Running tests
 
 You can run the tests with:
 
 ```bash
-make test
+make tests
 ```
 
 This will run the tests with [pytest](https://docs.pytest.org/en/latest/) and show information about the coverage.
@@ -62,4 +63,3 @@ To release a new version, you need to follow these steps:
 2. Create a Github release with the new version number.
 
 3. (Optional) Publish the new version to PyPI with `poetry publish --build`.
-
