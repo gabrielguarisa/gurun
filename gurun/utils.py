@@ -1,5 +1,6 @@
 from typing import Any
 
+import random
 import time
 
 from gurun.node import Node, WrapperNode
@@ -41,6 +42,24 @@ class Periodic(Node):
             self._last_run = time.time()
 
         return self._output
+
+
+class RandomPeriodic(Periodic):
+    def __init__(
+        self,
+        node: Node,
+        min_interval: int,
+        max_interval: int,
+        *args: Any,
+        **kwargs: Any,
+    ):
+        super().__init__(node, 0, *args, **kwargs)
+        self._min_interval = min_interval
+        self._max_interval = max_interval
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        self._interval = random.randint(self._min_interval, self._max_interval)
+        return super().__call__(*args, **kwargs)
 
 
 class Wait(Node):
