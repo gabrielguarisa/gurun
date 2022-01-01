@@ -79,4 +79,9 @@ class TemplateDetectionFrom(TemplateDetection):
         if self._transformation is None:
             return super().__call__(image, *args, **kwargs)
 
-        return self._transformation(super().__call__(image, *args, **kwargs))
+        output = super().__call__(image, *args, **kwargs)
+
+        if output is None:
+            return None
+
+        return self._transformation(output)

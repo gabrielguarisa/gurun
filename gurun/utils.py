@@ -5,9 +5,13 @@ import time
 from gurun.node import Node, WrapperNode
 
 
-class Sleep(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(time.sleep, *args, **kwargs)
+class Sleep(Node):
+    def __init__(self, interval: int = 5, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._interval = interval
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        time.sleep(self._interval)
 
 
 class RaiseException(Node):

@@ -44,4 +44,8 @@ class NaturalRectToPoint(Node):
                 for r in rect
             ]
         else:
-            raise ValueError("RectToPoint: Input must be a 1D or 2D array")
+            raise ValueError(
+                "RectToPoint: Input must be a 1D or 2D array. Input shape: {}".format(
+                    np.shape(rect)
+                )
+            )
