@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Callable, List
 
 import random
 
@@ -10,26 +10,6 @@ except ImportError:
     raise ImportError(
         "pyautogui is not installed. Please install it with `pip install pyautogui`."
     )
-
-pyautogui.FAILSAFE = False
-
-MOUSE_RANDOM_MOVES = [
-    pyautogui.easeInOutQuad,
-    pyautogui.easeInOutCubic,
-    pyautogui.easeInOutQuart,
-    pyautogui.easeInOutQuint,
-    pyautogui.easeInOutSine,
-    pyautogui.easeInOutExpo,
-    pyautogui.easeInOutCirc,
-    pyautogui.easeInElastic,
-    pyautogui.easeOutElastic,
-    pyautogui.easeInOutElastic,
-    pyautogui.easeInBounce,
-    pyautogui.easeOutBounce,
-    pyautogui.easeInOutBounce,
-]
-MINIMUM_DURATION = 0.1
-MAXIMUM_DURATION = 1.0
 
 
 class Typewrite(WrapperNode):
@@ -81,17 +61,33 @@ class DragRel(WrapperNode):
 class MultipleClicks(Click):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         for x, y in positions:
-            super().__call__(*args, x=x, y=y, **kwargs, **self._memory)
+            super().__call__(*args, x=x, y=y, **kwargs)
 
 
 class NaturalClick(Click):
+    def __init__(
+        self,
+        easing_functions: List[Callable] = [
+            pyautogui.easeInQuad,
+            pyautogui.easeOutQuad,
+            pyautogui.easeInOutQuad,
+        ],
+        minimum_duration: int = 0.1,
+        maximum_duration: int = 1,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._easing_functions = easing_functions
+        self._minimum_duration = minimum_duration
+        self._maximum_duration = maximum_duration
+
     def __call__(self, *args: Any, **kwargs: Any):
         return super().__call__(
             *args,
-            tween=random.choice(MOUSE_RANDOM_MOVES),
-            duration=random.uniform(MINIMUM_DURATION, MAXIMUM_DURATION),
+            tween=random.choice(self._easing_functions),
+            duration=random.uniform(self._minimum_duration, self._maximum_duration),
             **kwargs,
-            **self._memory,
         )
 
 
@@ -99,4 +95,4 @@ class MultipleNaturalClicks(NaturalClick):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         print(positions)
         for x, y in positions:
-            super().__call__(*args, x=x, y=y, **kwargs, **self._memory)
+            super().__call__(*args, x=x, y=y, **kwargs)
