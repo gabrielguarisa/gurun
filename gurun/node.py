@@ -7,12 +7,14 @@ class Node:
         default_output: Any = None,
         default_state: bool = True,
         name: str = None,
+        ravel: bool = False,
         *args: Any,
         **kwargs: Any,
     ):
-        self.name = name
-        self._state = default_state
         self._output = default_output
+        self._state = default_state
+        self.name = name
+        self.ravel = ravel
         self._memory = kwargs
 
     @property
@@ -22,6 +24,14 @@ class Node:
     @name.setter
     def name(self, name: str) -> None:
         self._name = self.__class__.__name__ if name is None else name
+
+    @property
+    def ravel(self) -> str:
+        return self._ravel
+
+    @ravel.setter
+    def ravel(self, ravel: bool) -> None:
+        self._ravel = ravel
 
     @property
     def state(self) -> bool:
@@ -121,6 +131,7 @@ class NodeSequence(NodeSet):
         print(f"Running node: {self.name}")
         result = None
         first = True
+        ravel = False
         for node in self.nodes:
             print(f"Running node: {node.name}")
             if first:
@@ -128,11 +139,14 @@ class NodeSequence(NodeSet):
                 first = False
             elif result is None and self.ignore_none_output:
                 result = node(**self._memory)
+            elif ravel:
+                result = node(**result, **self._memory)
             else:
                 result = node(result, **self._memory)
 
             self._state = node.state
             self._output = node.output
+            ravel = node.ravel
 
             if not node.state:
                 return self.output
@@ -255,12 +269,16 @@ class BranchNode(Node):
         if self.trigger.state:
             if trigger_result is None and self.ignore_none_output:
                 self._output = self.positive(**self._memory)
+            elif self.trigger.ravel:
+                self._output = self.positive(**trigger_result, **self._memory)
             else:
                 self._output = self.positive(trigger_result, **self._memory)
             self._state = self.positive.state
         else:
             if trigger_result is None and self.ignore_none_output:
                 self._output = self.negative(**self._memory)
+            elif self.trigger.ravel:
+                self._output = self.negative(**trigger_result, **self._memory)
             else:
                 self._output = self.negative(trigger_result, **self._memory)
             self._state = self.negative.state
