@@ -1,15 +1,13 @@
 [tool.poetry]
 name = "gurun"
 version = "0.2.1"
-description = "Framework de autotomação de tarefas"
+description = "Task automation framework"
 authors = ["Gabriel Guarisa <gabrielguarisa@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/gabrielguarisa/gurun"
 homepage = "https://github.com/gabrielguarisa/gurun"
-
-# Keywords description https://python-poetry.org/docs/pyproject/#keywords
-keywords = [] #! Update me
+keywords = ["automation", "workflow", "pipeline", "task", "framework"]
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [  #! Update me
@@ -39,7 +37,6 @@ isort = { extras = ["colors"], version = "^5.9.3" }
 pre-commit = "^2.13.0"
 pytest = "^6.2.4"
 pytest-cov = "^2.12.1"
-pyupgrade = "^2.23.1"
 
 [tool.poetry.extras]
 gui = ["opencv-python", "PyAutoGUI", "mss"]
