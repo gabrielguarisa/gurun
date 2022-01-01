@@ -52,9 +52,20 @@ class HotKey(WrapperNode):
         super().__init__(pyautogui.hotkey, *args, **kwargs)
 
 
-class Move(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.move, *args, **kwargs)
+class MoveRel(Node):
+    def __init__(
+        self,
+        x: int = 0,
+        y: int = 0,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._x = x
+        self._y = y
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        pyautogui.moveRel(self._x, self._y, **self._memory)
 
 
 class MoveTo(WrapperNode):
@@ -65,11 +76,6 @@ class MoveTo(WrapperNode):
 class DragRel(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(pyautogui.dragRel, *args, **kwargs)
-
-
-class MoveRel(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.moveRel, *args, **kwargs)
 
 
 class MultipleClicks(Click):
@@ -91,5 +97,6 @@ class NaturalClick(Click):
 
 class MultipleNaturalClicks(NaturalClick):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
+        print(positions)
         for x, y in positions:
             super().__call__(*args, x=x, y=y, **kwargs, **self._memory)
