@@ -1,9 +1,8 @@
 from typing import Any
 
-import numpy as np
-
 try:
     import cv2
+    import numpy as np
 except ImportError:
     raise ImportError(
         "cv2 is not installed. Please install it with `pip install opencv-python`."
