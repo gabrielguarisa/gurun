@@ -52,6 +52,11 @@ class HotKey(WrapperNode):
         super().__init__(pyautogui.hotkey, *args, **kwargs)
 
 
+class Move(WrapperNode):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(pyautogui.move, *args, **kwargs)
+
+
 class MoveTo(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(pyautogui.moveTo, *args, **kwargs)
