@@ -1,7 +1,11 @@
 """Framework de autotomação de tarefas"""
 
 import sys
-from importlib import metadata as importlib_metadata
+
+if sys.version_info >= (3, 8):
+    from importlib import metadata as importlib_metadata
+else:
+    import importlib_metadata # pragma: no cover
 
 
 def get_version() -> str:
