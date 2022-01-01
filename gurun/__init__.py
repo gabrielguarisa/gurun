@@ -17,7 +17,7 @@ def get_version() -> str:
 
 version: str = get_version()
 
-from gurun import cv, exceptions, gui, runner, utils
+from gurun import exceptions, runner, utils
 from gurun.node import (
     BranchNode,
     ConstantNode,
@@ -39,8 +39,6 @@ __all__ = [
     "NodeSequence",
     "UnionNode",
     "BranchNode",
-    "cv",
-    "gui",
     "exceptions",
     "runner",
     "utils",
