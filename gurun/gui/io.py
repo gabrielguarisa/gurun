@@ -70,7 +70,7 @@ class MoveRel(WrapperNode):
 class MultipleClicks(Click):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         for x, y in positions:
-            super().__call__(x, y * args, **kwargs, **self._memory)
+            super().__call__(*args, x=x, y=y, **kwargs, **self._memory)
 
 
 class NaturalClick(Click):
@@ -87,4 +87,4 @@ class NaturalClick(Click):
 class MultipleNaturalClicks(NaturalClick):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         for x, y in positions:
-            super().__call__(x, y * args, **kwargs, **self._memory)
+            super().__call__(*args, x=x, y=y, **kwargs, **self._memory)
