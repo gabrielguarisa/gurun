@@ -88,7 +88,7 @@ class Offset(Transformation):
                 "x": detections["x"] + self._xOffset,
                 "y": detections["y"] + self._yOffset,
             }
-        if len(np.shape(detections)) == 1:
+        elif len(np.shape(detections)) == 1:
             detections[0] += self._xOffset
             detections[1] += self._yOffset
             return detections
