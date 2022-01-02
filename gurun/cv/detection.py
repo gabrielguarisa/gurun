@@ -8,7 +8,6 @@ except ImportError:
         "cv2 is not installed. Please install it with `pip install opencv-python`."
     )
 
-from gurun.cv.transformation import NaturalRectToPoint
 from gurun.node import Node
 
 
@@ -66,24 +65,13 @@ class TemplateDetectionFrom(TemplateDetection):
     def __init__(
         self,
         source_node: Node,
-        transformation: Node = NaturalRectToPoint(),
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self._source_node = source_node
-        self._transformation = transformation
 
     def __call__(self, *args: Any, **kwargs: Any) -> List[List[int]]:
         image = self._source_node(*args, **kwargs)
 
-        self._output = super().__call__(image, *args, **kwargs)
-
-        if self._output is None:
-            self._state = False
-            return None
-        elif self._transformation is None:
-            self._state = True
-            return self._output
-
-        return self._transformation(self._output)
+        return super().__call__(image, *args, **kwargs)

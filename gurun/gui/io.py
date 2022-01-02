@@ -72,8 +72,8 @@ class NaturalClick(Click):
             pyautogui.easeOutQuad,
             pyautogui.easeInOutQuad,
         ],
-        minimum_duration: int = 0.1,
-        maximum_duration: int = 1,
+        minimum_duration: int = 1,
+        maximum_duration: int = 1.5,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -93,6 +93,5 @@ class NaturalClick(Click):
 
 class MultipleNaturalClicks(NaturalClick):
     def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
-        print(positions)
         for x, y in positions:
             super().__call__(*args, x=x, y=y, **kwargs)

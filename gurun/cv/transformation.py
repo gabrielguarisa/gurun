@@ -13,41 +13,32 @@ except ImportError:
         "cv2 is not installed. Please install it with `pip install opencv-python`."
     )
 
-BORDER_PROPORTION = 0.1
 
-
-class RectToPoint(Node):
-    def __call__(self, rect: np.ndarray, *args: Any, **kwargs: Any) -> Any:
-        if len(np.shape(rect)) == 1:
-            return {"x": rect[0] + (rect[2] / 2), "y": rect[1] + (rect[3] / 2)}
-        elif len(np.shape(rect)) == 2:
-            return [[r[0] + (r[2] / 2), r[1] + (r[3] / 2)] for r in rect]
-        else:
-            raise ValueError("RectToPoint: Input must be a 1D or 2D array")
-
-
-class NaturalRectToPoint(Node):
-    def __transform(self, value: int, limit: int) -> int:
-        value_start = value + (limit * BORDER_PROPORTION)
-        value_end = (value + limit) - (limit * BORDER_PROPORTION)
-        return math.floor(random.uniform(value_start, value_end))
-
+class Transformation(Node):
     def __call__(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         if detections is None:
             self._output = None
             self._state = False
             return None
 
+        self._output = self._transform(detections, *args, **kwargs)
+        self._state = True
+
+        return self.output
+
+    def _transform(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
+        raise NotImplementedError()
+
+
+class RectToPoint(Transformation):
+    def _transform(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         if len(np.shape(detections)) == 1:
-            detections = {
-                "x": self.__transform(detections[0], detections[2]),
-                "y": self.__transform(detections[1], detections[3]),
+            return {
+                "x": detections[0] + (detections[2] / 2),
+                "y": detections[1] + (detections[3] / 2),
             }
         elif len(np.shape(detections)) == 2:
-            detections = [
-                [self.__transform(r[0], r[2]), self.__transform(r[1], r[3])]
-                for r in detections
-            ]
+            return [[r[0] + (r[2] / 2), r[1] + (r[3] / 2)] for r in detections]
         else:
             raise ValueError(
                 "RectToPoint: Input must be a 1D or 2D array. Input shape: {}".format(
@@ -55,26 +46,45 @@ class NaturalRectToPoint(Node):
                 )
             )
 
-        self._output = detections
-        self._state = True
 
-        return detections
+class NaturalRectToPoint(Transformation):
+    def __init__(self, border_proportion: float = 0.25, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._border_proportion = border_proportion
+
+    def __natural_range(self, value: int, limit: int) -> int:
+        value_start = value + (limit * self._border_proportion)
+        value_end = (value + limit) - (limit * self._border_proportion)
+        return math.floor(random.uniform(value_start, value_end))
+
+    def _transform(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
+        if len(np.shape(detections)) == 1:
+            return {
+                "x": self.__natural_range(detections[0], detections[2]),
+                "y": self.__natural_range(detections[1], detections[3]),
+            }
+        elif len(np.shape(detections)) == 2:
+            return [
+                [self.__natural_range(r[0], r[2]), self.__natural_range(r[1], r[3])]
+                for r in detections
+            ]
+        else:
+            raise ValueError(
+                "NaturalRectToPoint: Input must be a 1D or 2D array. Input shape: {}".format(
+                    np.shape(detections)
+                )
+            )
 
 
-class Offset(Node):
+class Offset(Transformation):
     def __init__(self, xOffset: int = 0, yOffset: int = 0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._xOffset = xOffset
         self._yOffset = yOffset
 
-    def __call__(self, detections, *args: Any, **kwds: Any) -> Any:
-        if detections is None:
-            self._output = None
-            self._state = False
-            return None
-
+    def _transform(self, detections: np.ndarray, *args: Any, **kwds: Any) -> Any:
         if len(np.shape(detections)) == 1:
-            detections = {
+            return {
                 "x": detections["x"] + self._xOffset,
                 "y": detections["y"] + self._yOffset,
             }
@@ -83,7 +93,10 @@ class Offset(Node):
                 detection[0] += self._xOffset
                 detection[1] += self._yOffset
 
-        self._output = detections
-        self._state = True
-
-        return detections
+            return detections
+        else:
+            raise ValueError(
+                "Offset: Input must be a 1D or 2D array. Input shape: {}".format(
+                    np.shape(detections)
+                )
+            )

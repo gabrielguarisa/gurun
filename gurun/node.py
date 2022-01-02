@@ -105,10 +105,10 @@ class NodeSet(Node):
         return self
 
     def __call__(self, *args: Any, **kwargs: Any) -> None:
-        print(f"Running node: {self.name}")
+        print(f"Running: {self.name}")
 
         for node in self.nodes:
-            print(f"Running node: {node.name}")
+            print(f"Running: {node.name}")
             node()
 
 
@@ -128,12 +128,12 @@ class NodeSequence(NodeSet):
         return self._ignore_none_output
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        print(f"Running node: {self.name}")
+        print(f"Running: {self.name}")
         result = None
         first = True
         ravel = False
         for node in self.nodes:
-            print(f"Running node: {node.name}")
+            print(f"Running: {node.name}")
             if first:
                 result = node(*args, **kwargs, **self._memory)
                 first = False
@@ -191,11 +191,11 @@ class UnionNode(NodeSequence):
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        print(f"Running node: {self.name}")
+        print(f"Running: {self.name}")
         self._output = {}
         self._state = True
         for node in self.nodes:
-            print(f"Running node: {node.name}")
+            print(f"Running: {node.name}")
             result = node(*args, **kwargs, **self._memory)
 
             if not (result is None and self.ignore_none_output):
@@ -263,7 +263,7 @@ class BranchNode(Node):
         self._negative = negative
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        print(f"Running node: {self.name}")
+        print(f"Running: {self.name}")
         trigger_result = self.trigger(*args, **kwargs, **self._memory)
 
         if self.trigger.state:
