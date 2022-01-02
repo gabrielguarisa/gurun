@@ -55,6 +55,12 @@ class ConstantNode(Node):
         return self._output
 
 
+class NotNode(Node):
+    def __call__(self, *args: Any, **kwargs: Any) -> bool:
+        self._state = not self._state
+        return self._output
+
+
 class WrapperNode(Node):
     def __init__(self, func: Callable, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
