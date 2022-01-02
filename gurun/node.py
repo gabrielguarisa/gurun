@@ -55,12 +55,6 @@ class ConstantNode(Node):
         return self._output
 
 
-class NotNode(Node):
-    def __call__(self, *args: Any, **kwargs: Any) -> bool:
-        self._state = not self._state
-        return self._output
-
-
 class WrapperNode(Node):
     def __init__(self, func: Callable, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
@@ -111,8 +105,6 @@ class NodeSet(Node):
         return self
 
     def __call__(self, *args: Any, **kwargs: Any) -> None:
-        print(f"Running: {self.name}")
-
         for node in self.nodes:
             print(f"Running: {node.name}")
             node()
@@ -134,7 +126,6 @@ class NodeSequence(NodeSet):
         return self._ignore_none_output
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        print(f"Running: {self.name}")
         result = None
         first = True
         ravel = False
@@ -197,7 +188,6 @@ class UnionNode(NodeSequence):
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        print(f"Running: {self.name}")
         self._output = {}
         self._state = True
         for node in self.nodes:
@@ -269,7 +259,6 @@ class BranchNode(Node):
         self._negative = negative
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        print(f"Running: {self.name}")
         trigger_result = self.trigger(*args, **kwargs, **self._memory)
 
         if self.trigger.state:

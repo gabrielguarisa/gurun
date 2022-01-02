@@ -81,6 +81,42 @@ class Wait(Node):
         return None
 
 
+class NotNode(Node):
+    def __init__(self, node: Node, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._node = node
+
+    def __call__(self, *args: Any, **kwargs: Any) -> bool:
+        self._output = self._node(*args, **kwargs, **self._memory)
+        self._state = not self._node.state
+        return self.output
+
+
+class While(Node):
+    def __init__(
+        self, trigger: Node, action: Node, timeout: int, *args: Any, **kwargs: Any
+    ):
+        super().__init__(*args, **kwargs)
+        self._trigger = trigger
+        self._action = action
+        self._timeout = timeout
+
+    def __call__(self, *args: Any, **kwargs: Any) -> None:
+        start = time.time()
+        self._state = False
+        while time.time() - start < self._timeout:
+            self._trigger(*args, **kwargs, **self._memory)
+            if self._trigger.state:
+                self._action(*args, **kwargs, **self._memory)
+            else:
+                self._state = True
+                break
+
+
 class Print(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(print, *args, **kwargs)
+        self._args = args
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return super().__call__(*self._args, *args, **kwargs)

@@ -83,11 +83,15 @@ class Offset(Transformation):
         self._yOffset = yOffset
 
     def _transform(self, detections: np.ndarray, *args: Any, **kwds: Any) -> Any:
-        if len(np.shape(detections)) == 1:
+        if isinstance(detections, dict):
             return {
                 "x": detections["x"] + self._xOffset,
                 "y": detections["y"] + self._yOffset,
             }
+        if len(np.shape(detections)) == 1:
+            detections[0] += self._xOffset
+            detections[1] += self._yOffset
+            return detections
         elif len(np.shape(detections)) == 2:
             for detection in detections:
                 detection[0] += self._xOffset
