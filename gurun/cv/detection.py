@@ -24,7 +24,9 @@ class TemplateDetection(Node):
         if isinstance(target, str):
             target = cv2.imread(target)
             if target is None:
-                raise ValueError("Template Detection target file does not exist")
+                raise ValueError(
+                    f"Template Detection target file {target} does not exist"
+                )
 
         self._target = target
         self._target_height = int(target.shape[0])
