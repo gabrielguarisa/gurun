@@ -79,3 +79,8 @@ class Wait(Node):
 
         self._state = False
         return None
+
+
+class Print(WrapperNode):
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(print, *args, **kwargs)
