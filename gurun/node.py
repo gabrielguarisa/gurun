@@ -85,16 +85,25 @@ class _BaseNode(object):
             if self.verbose > 0:
                 print(f"Running: {self.name}")
                 if self.verbose > 2:
-                    print(f"\tArgs: {args}", f"Kwargs: {kwargs}")
+                    print(
+                        f"\tArgs: {args}",
+                        f"Kwargs: {kwargs}",
+                        "Args memory:",
+                        self._args_memory,
+                        "Kwargs memory:",
+                        self._kwargs_memory,
+                    )
 
-            self.__output = m(*self._args_memory, *args, **self._kwargs_memory, **kwargs)
+            args = (*self._args_memory, *args)
+            kwargs = {**self._kwargs_memory, **kwargs}
+
+            self.__output = m(*args, **kwargs)
 
             if self.verbose > 1:
                 print(f"\tOutput: {self.__output}")
 
             return self.__output
-            
-        wrapper.__doc__ = m.__doc__
+
         return wrapper
 
 
@@ -111,10 +120,10 @@ class Node(_BaseNode):
         raise NotImplementedError
 
 
-
 class ConstantNode(Node):
     def run(self, *args: Any, **kwargs: Any) -> Any:
         return self.output
+
 
 class NullNode(ConstantNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -125,7 +134,6 @@ class WrapperNode(Node):
     def __init__(self, func: Callable, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._func = func
-        self.run.__doc__ = func.__doc__
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
         try:
@@ -133,6 +141,7 @@ class WrapperNode(Node):
             return self._func(*args, **kwargs)
         except:
             self.state = False
+
 
 class NodeSet(Node):
     def __init__(
@@ -275,8 +284,8 @@ class BranchNode(Node):
     def __init__(
         self,
         trigger: Node,
-        positive: Node = NullNode(),
-        negative: Node = NullNode(),
+        positive: Node = None,
+        negative: Node = None,
         ignore_none_output: bool = True,
         *args: Any,
         **kwargs: Any,
@@ -302,24 +311,29 @@ class BranchNode(Node):
     def positive(self) -> Node:
         return self._positive
 
-
     @positive.setter
-    def positive(self, positive: Node) -> None:
-        if not isinstance(positive, Node):
-            positive = WrapperNode(positive)
+    def positive(self, value: Node) -> None:
+        if value is None:
+            value = NullNode()
 
-        self._positive = positive
+        if not isinstance(value, Node):
+            value = WrapperNode(value)
+
+        self._positive = value
 
     @property
     def negative(self) -> Node:
         return self._negative
 
     @negative.setter
-    def negative(self, negative: Node) -> None:
-        if not isinstance(negative, Node):
-            negative = WrapperNode(negative)
+    def negative(self, value: Node) -> None:
+        if value is None:
+            value = NullNode()
 
-        self._negative = negative
+        if not isinstance(value, Node):
+            value = WrapperNode(value)
+
+        self._negative = value
 
     @property
     def ignore_none_output(self) -> bool:
@@ -335,7 +349,6 @@ class BranchNode(Node):
             )
 
         self._ignore_none_output = value
-
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
         trigger_result = self.trigger.run(*args, **kwargs)

@@ -36,7 +36,7 @@ class TemplateDetection(Node):
         self._single_match = single_match
         self._method = method
 
-    def __call__(
+    def run(
         self, image: Union[np.ndarray, str], *args: Any, **kwargs: Any
     ) -> List[List[int]]:
         if isinstance(image, str):
@@ -56,13 +56,11 @@ class TemplateDetection(Node):
         rectangles, _ = cv2.groupRectangles(rectangles, 1, 0.2)
 
         if len(rectangles) == 0:
-            self._output = None
-            self._state = False
-        else:
-            self._output = rectangles[0] if self._single_match else rectangles
-            self._state = True
+            self.state = False
+            return None
 
-        return self._output
+        self.state = True
+        return rectangles[0] if self._single_match else rectangles
 
 
 class TemplateDetectionFrom(TemplateDetection):
@@ -75,7 +73,7 @@ class TemplateDetectionFrom(TemplateDetection):
         super().__init__(*args, **kwargs)
         self._source_node = source_node
 
-    def __call__(self, *args: Any, **kwargs: Any) -> List[List[int]]:
+    def run(self, *args: Any, **kwargs: Any) -> List[List[int]]:
         image = self._source_node(*args, **kwargs)
 
-        return super().__call__(image, *args, **kwargs)
+        return super().run(image, *args, **kwargs)

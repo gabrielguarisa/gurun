@@ -44,8 +44,8 @@ class MoveRel(Node):
         self._x = x
         self._y = y
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        pyautogui.moveRel(self._x, self._y, **self._memory)
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        pyautogui.moveRel(self._x, self._y)
 
 
 class MoveTo(WrapperNode):
@@ -59,9 +59,9 @@ class DragRel(WrapperNode):
 
 
 class MultipleClicks(Click):
-    def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
+    def run(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         for x, y in positions:
-            super().__call__(*args, x=x, y=y, **kwargs)
+            super().run(*args, x=x, y=y, **kwargs)
 
 
 class NaturalClick(Click):
@@ -82,8 +82,8 @@ class NaturalClick(Click):
         self._minimum_duration = minimum_duration
         self._maximum_duration = maximum_duration
 
-    def __call__(self, *args: Any, **kwargs: Any):
-        return super().__call__(
+    def run(self, *args: Any, **kwargs: Any):
+        return super().run(
             *args,
             tween=random.choice(self._easing_functions),
             duration=random.uniform(self._minimum_duration, self._maximum_duration),
@@ -92,6 +92,6 @@ class NaturalClick(Click):
 
 
 class MultipleNaturalClicks(NaturalClick):
-    def __call__(self, positions: List[List[int]], *args: Any, **kwargs: Any):
+    def run(self, positions: List[List[int]], *args: Any, **kwargs: Any):
         for x, y in positions:
-            super().__call__(*args, x=x, y=y, **kwargs)
+            super().run(*args, x=x, y=y, **kwargs)

@@ -24,14 +24,13 @@ from gurun.node import Node
 
 
 class ScreenshotPAG(Node):
-    def __call__(self, filename: str = None, *args: Any, **kwargs: Any) -> np.ndarray:
+    def run(self, filename: str = None, *args: Any, **kwargs: Any) -> np.ndarray:
         image = pyautogui.screenshot()
 
         if filename is not None:
             image.save(filename)
 
-        self._output = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        return self.output
+        return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
 
 class ScreenshotMMS(Node):
@@ -39,12 +38,11 @@ class ScreenshotMMS(Node):
         super().__init__(*args, **kwargs)
         self._monitor = monitor
 
-    def __call__(self, filename: str = None, *args: Any, **kwargs: Any) -> np.ndarray:
-
+    def run(self, filename: str = None, *args: Any, **kwargs: Any) -> np.ndarray:
         with mss.mss() as sct:
-            self._output = np.array(sct.grab(sct.monitors[self._monitor]))[:, :, :3]
+            output = np.array(sct.grab(sct.monitors[self._monitor]))[:, :, :3]
 
         if filename is not None:
-            cv2.imwrite(filename, self.output)
+            cv2.imwrite(filename, output)
 
-        return self.output
+        return output

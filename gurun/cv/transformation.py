@@ -15,16 +15,13 @@ except ImportError:
 
 
 class Transformation(Node):
-    def __call__(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
+    def run(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         if detections is None:
-            self._output = None
-            self._state = False
+            self.state = False
             return None
 
-        self._output = self._transform(detections, *args, **kwargs)
-        self._state = True
-
-        return self.output
+        self.state = True
+        return self._transform(detections, *args, **kwargs)
 
     def _transform(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError()

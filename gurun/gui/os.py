@@ -3,17 +3,12 @@ from typing import Any
 import subprocess
 
 from gurun import Node
+from gurun.node import WrapperNode
 
 
-class Subprocess(Node):
+class Subprocess(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(**kwargs)
-        self._commands = args
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        self._state = True
-        self._output = subprocess.run(self._commands, *args, **kwargs, **self._memory)
-        return self._output
+        super().__init__(subprocess.run, *args, **kwargs)
 
 
 class Workspace(Subprocess):

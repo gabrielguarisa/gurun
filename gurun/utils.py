@@ -12,7 +12,7 @@ class Sleep(Node):
         self._interval = interval
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
-        time.sleep(self._interval)
+        time.sleep(self._interval, *args, **kwargs)
 
 
 class RaiseException(Node):
