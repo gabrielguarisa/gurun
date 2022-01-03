@@ -19,7 +19,7 @@ def test_node():
     assert node.output is True
 
     with pytest.raises(NotImplementedError):
-        node()
+        node.run()
 
 
 def test_null_node():
@@ -28,7 +28,7 @@ def test_null_node():
     assert node.state is True
     assert node.output is None
 
-    assert node() is None
+    assert node.run() is None
 
 
 def test_constant_node():
@@ -36,7 +36,7 @@ def test_constant_node():
 
     assert node.output == 10
     assert node.state is True
-    assert node(1) == 10
+    assert node.run(1) == 10
 
 
 def test_wrapper_node():
@@ -49,8 +49,7 @@ def test_wrapper_node():
     assert node.state is True
     assert node.output is None
 
-    assert node(1) == 2
-    assert node.__call__.__doc__ == "Test docstring"
+    assert node.run(1) == 2
 
     assert node.output == 2
 
@@ -64,7 +63,7 @@ def test_wrapper_node_with_exception():
     assert node.state is True
     assert node.output is None
 
-    assert node(1) == None
+    assert node.run(1) == None
 
     assert node.output is None
     assert node.state is False
@@ -73,7 +72,7 @@ def test_wrapper_node_with_exception():
 def test_node_set():
     node = NodeSet([NullNode(), lambda x: x + 1, lambda x: x + 2])
 
-    assert node() is None
+    assert node.run() is None
     assert node.state is True
     assert len(node.nodes) == 3
 
@@ -81,7 +80,7 @@ def test_node_set():
 def test_empty_node_set():
     node = NodeSet()
 
-    assert node() is None
+    assert node.run() is None
 
 
 def test_node_set_add_node():
@@ -91,7 +90,7 @@ def test_node_set_add_node():
         .add_node(lambda x: x + 2)
     )
 
-    assert node() is None
+    assert node.run() is None
     assert node.state is True
     assert len(node.nodes) == 3
 
@@ -103,7 +102,7 @@ def test_node_sequence():
     node.add_node(ConstantNode(default_output=10))
     node.add_node(lambda x: x + 1)
 
-    assert node(1) == 11
+    assert node.run(1) == 11
 
 
 def test_node_sequence_with_exception():
@@ -115,7 +114,7 @@ def test_node_sequence_with_exception():
     node.add_node(NullNode())
     node.add_node(f)
 
-    assert node(1) is None
+    assert node.run(1) is None
 
 
 def test_union_node():
@@ -126,17 +125,20 @@ def test_union_node():
         .add_node(lambda x: x + 2, "TestNode")
     )
 
-    assert node(1) == {"WrapperNode": 2, "TestNode": 3}
+    assert node.run(1) == {"WrapperNode": 2, "TestNode": 3}
 
     node.return_node_names = ["TestNode", "WrapperNode"]
+    node.run(1)
 
     assert node.output == {"TestNode": 3, "WrapperNode": 2}
 
     node.return_node_names = "WrapperNode"
+    node.run(1)
 
     assert node.output == 2
 
     node.return_node_names = "Example"
+    node.run(1)
 
     assert node.output == None
 
@@ -147,7 +149,7 @@ def test_union_node_with_exception():
 
     node = UnionNode().add_node(NullNode()).add_node(f)
 
-    assert node(1) is None
+    assert node.run(1) is None
     assert node.state is False
 
 
@@ -158,14 +160,14 @@ def test_branch_node():
         negative=ConstantNode(default_output=False),
     )
 
-    assert node() == True
+    assert node.run() == True
     assert node.trigger.state is True
     assert node.output == node.positive.output
     assert node.state is True
 
     node.trigger = NullNode(default_state=False)
 
-    assert node() == False
+    assert node.run() == False
     assert node.trigger.state is False
     assert node.output == node.negative.output
     assert node.state is True
@@ -174,8 +176,8 @@ def test_branch_node():
 def test_branch_node_with_wrappers():
     node = BranchNode(lambda x: x, positive=lambda x: x + 1, negative=lambda x: x - 1)
 
-    assert node(0) == 1
+    assert node.run(0) == 1
 
     node.trigger = ConstantNode(default_output=0, default_state=False)
 
-    assert node() == -1
+    assert node.run() == -1

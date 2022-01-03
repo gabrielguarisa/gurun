@@ -31,17 +31,17 @@ class Runner(NodeSet):
             ),
         )
 
-    def __call__(self):
-        self._start_node()
+    def run(self, *args, **kwargs) -> None:
+        self._start_node.run()
 
         try:
             while True:
                 for node in self.nodes:
-                    node()
+                    node.run()
 
-                    self._interval_node()
+                    self._interval_node.run()
 
         except KeyboardInterrupt:
             print("Interrupted!")
 
-        self._end_node()
+        self._end_node.run()

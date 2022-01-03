@@ -1,75 +1,138 @@
 from typing import Any, Callable, List, Union
 
+import os
 
-class Node:
+from gurun.exceptions import GurunTypeError
+
+
+class _BaseNode(object):
     def __init__(
         self,
         default_output: Any = None,
         default_state: bool = True,
+        verbose: int = 1,
         name: str = None,
         ravel: bool = False,
         *args: Any,
         **kwargs: Any,
-    ):
-        self._output = default_output
-        self._state = default_state
+    ) -> None:
+        self.__output = default_output
+        self.state = default_state
+        self.verbose = verbose
         self.name = name
         self.ravel = ravel
-        self._memory = kwargs
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @name.setter
-    def name(self, name: str) -> None:
-        self._name = self.__class__.__name__ if name is None else name
-
-    @property
-    def ravel(self) -> str:
-        return self._ravel
-
-    @ravel.setter
-    def ravel(self, ravel: bool) -> None:
-        self._ravel = ravel
-
-    @property
-    def state(self) -> bool:
-        return self._state
+        self._args_memory = args
+        self._kwargs_memory = kwargs
 
     @property
     def output(self) -> Any:
-        return self._output
+        return self.__output
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    @property
+    def state(self) -> bool:
+        return self.__state
+
+    @state.setter
+    def state(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise GurunTypeError(
+                var_name="state", expected_type="bool", received_type=type(value)
+            )
+
+        self.__state = value
+
+    @property
+    def verbose(self) -> int:
+        return self.__verbose
+
+    @verbose.setter
+    def verbose(self, value: int) -> None:
+        if value is not None and not isinstance(value, int):
+            raise GurunTypeError(
+                var_name="verbose", expected_type="int", received_type=type(value)
+            )
+
+        self.__verbose = int(os.getenv("GURUN_VERBOSE", 0)) if value is None else value
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        if value is not None and not isinstance(value, str):
+            raise GurunTypeError(
+                var_name="name", expected_type="str", received_type=type(value)
+            )
+
+        self.__name = self.__class__.__name__ if value is None else value
+
+    @property
+    def ravel(self) -> bool:
+        return self.__ravel
+
+    @ravel.setter
+    def ravel(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise GurunTypeError(
+                var_name="ravel", expected_type="bool", received_type=type(value)
+            )
+
+        self.__ravel = value
+
+    def _run(self, m: Callable) -> Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            if self.verbose > 0:
+                print(f"Running: {self.name}")
+                if self.verbose > 2:
+                    print(f"\tArgs: {args}", f"Kwargs: {kwargs}")
+
+            self.__output = m(*self._args_memory, *args, **self._kwargs_memory, **kwargs)
+
+            if self.verbose > 1:
+                print(f"\tOutput: {self.__output}")
+
+            return self.__output
+            
+        wrapper.__doc__ = m.__doc__
+        return wrapper
+
+
+class Node(_BaseNode):
+    def __getattribute__(self, attr):
+        attribute = super().__getattribute__(attr)
+
+        if attr == "run":
+            return self._run(attribute)
+
+        return attribute
+
+    def run(self, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError
 
 
-class NullNode(Node):
-    def __call__(self, *args: Any, **kwargs: Any) -> None:
-        return None
-
 
 class ConstantNode(Node):
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self._output
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        return self.output
+
+class NullNode(ConstantNode):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(None, *args, **kwargs)
 
 
 class WrapperNode(Node):
     def __init__(self, func: Callable, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._func = func
-        self.__call__.__func__.__doc__ = func.__doc__
+        self.run.__doc__ = func.__doc__
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    def run(self, *args: Any, **kwargs: Any) -> Any:
         try:
-            self._output = self._func(*args, **kwargs, **self._memory)
-            self._state = True
+            self.state = True
+            return self._func(*args, **kwargs)
         except:
-            self._output = None
-            self._state = False
-        return self._output
-
+            self.state = False
 
 class NodeSet(Node):
     def __init__(
@@ -104,10 +167,9 @@ class NodeSet(Node):
         self._nodes.append(node)
         return self
 
-    def __call__(self, *args: Any, **kwargs: Any) -> None:
+    def run(self, *args: Any, **kwargs: Any) -> None:
         for node in self.nodes:
-            print(f"Running: {node.name}")
-            node()
+            node.run()
 
 
 class NodeSequence(NodeSet):
@@ -119,36 +181,45 @@ class NodeSequence(NodeSet):
         **kwargs: Any,
     ):
         super().__init__(nodes, *args, **kwargs)
-        self._ignore_none_output = ignore_none_output
+        self.ignore_none_output = ignore_none_output
 
     @property
     def ignore_none_output(self) -> bool:
         return self._ignore_none_output
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        result = None
+    @ignore_none_output.setter
+    def ignore_none_output(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise GurunTypeError(
+                var_name="ignore_none_output",
+                expected_type="bool",
+                received_type=type(value),
+            )
+
+        self._ignore_none_output = value
+
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        output = None
         first = True
         ravel = False
         for node in self.nodes:
-            print(f"Running: {node.name}")
             if first:
-                result = node(*args, **kwargs, **self._memory)
+                output = node.run(*args, **kwargs)
                 first = False
-            elif result is None and self.ignore_none_output:
-                result = node(**self._memory)
+            elif output is None and self.ignore_none_output:
+                output = node.run()
             elif ravel:
-                result = node(**result, **self._memory)
+                output = node.run(**output)
             else:
-                result = node(result, **self._memory)
+                output = node.run(output)
 
-            self._state = node.state
-            self._output = node.output
+            self.state = node.state
             ravel = node.ravel
 
             if not node.state:
-                return self.output
+                return output
 
-        return self.output
+        return output
 
 
 class UnionNode(NodeSequence):
@@ -173,36 +244,31 @@ class UnionNode(NodeSequence):
 
         self._return_node_names = return_node_names
 
-    @property
-    def output(self) -> Any:
-        if self.return_node_names is None:
-            return self._output
-        elif len(self.return_node_names) == 1:
-            if self.return_node_names[0] not in self._output:
-                return None
-            return self._output[self.return_node_names[0]]
-        return {index: self._output[index] for index in self.return_node_names}
-
-    def __call__(
+    def run(
         self,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        self._output = {}
-        self._state = True
+        output = {}
+        self.state = True
         for node in self.nodes:
-            print(f"Running: {node.name}")
-            result = node(*args, **kwargs, **self._memory)
+            result = node.run(*args, **kwargs)
 
             if not (result is None and self.ignore_none_output):
-                self._output[node.name] = result
+                output[node.name] = result
 
             if not node.state:
-                self._output = None
-                self._state = False
+                output = None
+                self.state = False
                 return None
 
-        return self.output
+        if self.return_node_names is None:
+            return output
+        elif len(self.return_node_names) == 1:
+            if self.return_node_names[0] not in output:
+                return None
+            return output[self.return_node_names[0]]
+        return {index: output[index] for index in self.return_node_names}
 
 
 class BranchNode(Node):
@@ -219,23 +285,11 @@ class BranchNode(Node):
         self.trigger = trigger
         self.positive = positive
         self.negative = negative
-        self._ignore_none_output = ignore_none_output
+        self.ignore_none_output = ignore_none_output
 
     @property
     def trigger(self) -> Node:
         return self._trigger
-
-    @property
-    def positive(self) -> Node:
-        return self._positive
-
-    @property
-    def negative(self) -> Node:
-        return self._negative
-
-    @property
-    def ignore_none_output(self) -> bool:
-        return self._ignore_none_output
 
     @trigger.setter
     def trigger(self, trigger: Node) -> None:
@@ -244,12 +298,21 @@ class BranchNode(Node):
 
         self._trigger = trigger
 
+    @property
+    def positive(self) -> Node:
+        return self._positive
+
+
     @positive.setter
     def positive(self, positive: Node) -> None:
         if not isinstance(positive, Node):
             positive = WrapperNode(positive)
 
         self._positive = positive
+
+    @property
+    def negative(self) -> Node:
+        return self._negative
 
     @negative.setter
     def negative(self, negative: Node) -> None:
@@ -258,24 +321,40 @@ class BranchNode(Node):
 
         self._negative = negative
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        trigger_result = self.trigger(*args, **kwargs, **self._memory)
+    @property
+    def ignore_none_output(self) -> bool:
+        return self._ignore_none_output
+
+    @ignore_none_output.setter
+    def ignore_none_output(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise GurunTypeError(
+                var_name="ignore_none_output",
+                expected_type="bool",
+                received_type=type(value),
+            )
+
+        self._ignore_none_output = value
+
+
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        trigger_result = self.trigger.run(*args, **kwargs)
 
         if self.trigger.state:
             if trigger_result is None and self.ignore_none_output:
-                self._output = self.positive(**self._memory)
+                output = self.positive.run()
             elif self.trigger.ravel:
-                self._output = self.positive(**trigger_result, **self._memory)
+                output = self.positive.run(**trigger_result)
             else:
-                self._output = self.positive(trigger_result, **self._memory)
-            self._state = self.positive.state
+                output = self.positive.run(trigger_result)
+            self.state = self.positive.state
         else:
             if trigger_result is None and self.ignore_none_output:
-                self._output = self.negative(**self._memory)
+                output = self.negative.run()
             elif self.trigger.ravel:
-                self._output = self.negative(**trigger_result, **self._memory)
+                output = self.negative.run(**trigger_result)
             else:
-                self._output = self.negative(trigger_result, **self._memory)
-            self._state = self.negative.state
+                output = self.negative.run(trigger_result)
+            self.state = self.negative.state
 
-        return self.output
+        return output
