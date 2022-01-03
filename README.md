@@ -13,8 +13,23 @@ Task automation framework
 
 ## Installation
 
+Full installation:
+
+```bash
+pip install gurun[full]
+```
+
+Installing only the main framework components:
+
 ```bash
 pip install gurun
+```
+
+You can also install component dependencies separately. Thus, we have the cv (computer vision) version and the gui version:
+
+```bash
+pip install gurun[cv] 
+pip install gurun[gui]
 ```
 
 ## Development
