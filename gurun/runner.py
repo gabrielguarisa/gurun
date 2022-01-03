@@ -9,39 +9,38 @@ class Runner(NodeSet):
     def __init__(
         self,
         nodes: List[Node],
-        start_node: Node = NullNode(),
-        end_node: Node = NullNode(),
+        start_node: Node = None,
+        end_node: Node = None,
         interval: int = 5,
-        *args,
         **kwargs,
     ) -> None:
-        super().__init__(nodes, *args, **kwargs)
+        super().__init__(nodes, **kwargs)
 
         self._interval_node = Sleep(interval)
         self._start_node = BranchNode(
-            start_node,
+            NullNode() if start_node is None else start_node,
             negative=RaiseException(
                 RunnerException("Could not successfully run start node")
             ),
         )
         self._end_node = BranchNode(
-            end_node,
+            NullNode() if end_node is None else end_node,
             negative=RaiseException(
                 RunnerException("Could not successfully run end node")
             ),
         )
 
-    def __call__(self):
-        self._start_node()
+    def run(self, *args, **kwargs) -> None:
+        self._start_node.run()
 
         try:
             while True:
                 for node in self.nodes:
-                    node()
+                    node.run()
 
-                    self._interval_node()
+                    self._interval_node.run()
 
         except KeyboardInterrupt:
             print("Interrupted!")
 
-        self._end_node()
+        self._end_node.run()

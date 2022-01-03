@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 import math
 import random
@@ -15,16 +15,13 @@ except ImportError:
 
 
 class Transformation(Node):
-    def __call__(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
+    def run(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         if detections is None:
-            self._output = None
-            self._state = False
+            self.state = False
             return None
 
-        self._output = self._transform(detections, *args, **kwargs)
-        self._state = True
-
-        return self.output
+        self.state = True
+        return self._transform(detections, *args, **kwargs)
 
     def _transform(self, detections: np.ndarray, *args: Any, **kwargs: Any) -> Any:
         raise NotImplementedError()
@@ -48,8 +45,8 @@ class RectToPoint(Transformation):
 
 
 class NaturalRectToPoint(Transformation):
-    def __init__(self, border_proportion: float = 0.25, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, border_proportion: float = 0.25, **kwargs: Any):
+        super().__init__(**kwargs)
         self._border_proportion = border_proportion
 
     def __natural_range(self, value: int, limit: int) -> int:
@@ -77,8 +74,8 @@ class NaturalRectToPoint(Transformation):
 
 
 class Offset(Transformation):
-    def __init__(self, xOffset: int = 0, yOffset: int = 0, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, xOffset: int = 0, yOffset: int = 0, **kwargs):
+        super().__init__(**kwargs)
         self._xOffset = xOffset
         self._yOffset = yOffset
 

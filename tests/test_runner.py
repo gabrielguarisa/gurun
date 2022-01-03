@@ -14,7 +14,7 @@ def test_runner():
         interval=0,
     )
 
-    runner()
+    runner.run()
 
     assert runner.nodes[0].output == 1
     assert runner.nodes[1].output == 2

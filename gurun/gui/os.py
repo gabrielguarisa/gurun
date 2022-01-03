@@ -3,22 +3,21 @@ from typing import Any
 import subprocess
 
 from gurun import Node
+from gurun.node import WrapperNode
 
 
-class Subprocess(Node):
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(**kwargs)
-        self._commands = args
+class Subprocess(WrapperNode):
+    def __init__(self, *popenargs: Any, **kwargs: Any):
+        super().__init__(subprocess.run, **kwargs)
+        self._popenargs = popenargs
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        self._state = True
-        self._output = subprocess.run(self._commands, *args, **kwargs, **self._memory)
-        return self._output
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        return super().run(*self._popenargs, *args, **kwargs)
 
 
 class Workspace(Subprocess):
-    def __init__(self, workspace: str, os: str, *args: Any, **kwargs: Any):
+    def __init__(self, workspace: str, os: str, **kwargs: Any):
         if os.lower() == "linux":
-            super().__init__("wmctrl", "-s", workspace, *args, **kwargs)
+            super().__init__("wmctrl", "-s", workspace, **kwargs)
         else:
             raise ValueError("Workspace is only available on Linux")
