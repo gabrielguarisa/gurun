@@ -8,21 +8,21 @@ from gurun.exceptions import GurunTypeError
 class _BaseNode(object):
     def __init__(
         self,
+        *,
         default_output: Any = None,
         default_state: bool = True,
         verbose: int = 1,
         name: str = None,
         ravel: bool = False,
-        *args: Any,
-        **kwargs: Any,
+        **memory: Any,
     ) -> None:
         self.__output = default_output
         self.state = default_state
         self.verbose = verbose
         self.name = name
         self.ravel = ravel
-        self._args_memory = args
-        self._kwargs_memory = kwargs
+        self._memory = memory
+        self._args_memory = ()
 
     @property
     def output(self) -> Any:
@@ -88,16 +88,11 @@ class _BaseNode(object):
                     print(
                         f"\tArgs: {args}",
                         f"Kwargs: {kwargs}",
-                        "Args memory:",
-                        self._args_memory,
-                        "Kwargs memory:",
-                        self._kwargs_memory,
+                        f"Memory: {self._memory}",
+                        f"Args Memory: {self._args_memory}",
                     )
 
-            args = (*self._args_memory, *args)
-            kwargs = {**self._kwargs_memory, **kwargs}
-
-            self.__output = m(*args, **kwargs)
+            self.__output = m(*self._args_memory, *args, **self._memory, **kwargs)
 
             if self.verbose > 1:
                 print(f"\tOutput: {self.__output}")
@@ -121,18 +116,21 @@ class Node(_BaseNode):
 
 
 class ConstantNode(Node):
+    def __init__(self, default_output: Any, **kwargs: Any) -> None:
+        super().__init__(default_output=default_output, **kwargs)
+
     def run(self, *args: Any, **kwargs: Any) -> Any:
         return self.output
 
 
 class NullNode(ConstantNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(None, *args, **kwargs)
+        super().__init__(default_output=None, *args, **kwargs)
 
 
 class WrapperNode(Node):
-    def __init__(self, func: Callable, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, func: Callable, **kwargs: Any):
+        super().__init__(**kwargs)
         self._func = func
 
     def run(self, *args: Any, **kwargs: Any) -> Any:
@@ -147,10 +145,9 @@ class NodeSet(Node):
     def __init__(
         self,
         nodes: Union[Node, List[Node]] = [],
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.nodes = nodes
 
     @property
@@ -186,10 +183,9 @@ class NodeSequence(NodeSet):
         self,
         nodes: Union[Node, List[Node]] = [],
         ignore_none_output: bool = True,
-        *args: Any,
         **kwargs: Any,
     ):
-        super().__init__(nodes, *args, **kwargs)
+        super().__init__(nodes, **kwargs)
         self.ignore_none_output = ignore_none_output
 
     @property
@@ -236,10 +232,9 @@ class UnionNode(NodeSequence):
         self,
         nodes: Union[Node, List[Node]] = [],
         return_node_names: Union[str, List[str]] = None,
-        *args: Any,
         **kwargs: Any,
     ):
-        super().__init__(nodes=nodes, *args, **kwargs)
+        super().__init__(nodes=nodes, **kwargs)
         self.return_node_names = return_node_names
 
     @property
@@ -287,10 +282,9 @@ class BranchNode(Node):
         positive: Node = None,
         negative: Node = None,
         ignore_none_output: bool = True,
-        *args: Any,
         **kwargs: Any,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.trigger = trigger
         self.positive = positive
         self.negative = negative

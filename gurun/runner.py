@@ -12,10 +12,9 @@ class Runner(NodeSet):
         start_node: Node = None,
         end_node: Node = None,
         interval: int = 5,
-        *args,
         **kwargs,
     ) -> None:
-        super().__init__(nodes, *args, **kwargs)
+        super().__init__(nodes, **kwargs)
 
         self._interval_node = Sleep(interval)
         self._start_node = BranchNode(

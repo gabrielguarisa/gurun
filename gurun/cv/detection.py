@@ -18,10 +18,9 @@ class TemplateDetection(Node):
         threshold: float = 0.7,
         single_match: bool = False,
         method: int = cv2.TM_CCOEFF_NORMED,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         if isinstance(target, str):
             target = cv2.imread(target)
             if target is None:
@@ -67,10 +66,9 @@ class TemplateDetectionFrom(TemplateDetection):
     def __init__(
         self,
         source_node: Node,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self._source_node = source_node
 
     def run(self, *args: Any, **kwargs: Any) -> List[List[int]]:

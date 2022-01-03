@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 import math
 import random
@@ -45,8 +45,8 @@ class RectToPoint(Transformation):
 
 
 class NaturalRectToPoint(Transformation):
-    def __init__(self, border_proportion: float = 0.25, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, border_proportion: float = 0.25, **kwargs: Any):
+        super().__init__(**kwargs)
         self._border_proportion = border_proportion
 
     def __natural_range(self, value: int, limit: int) -> int:
@@ -74,8 +74,8 @@ class NaturalRectToPoint(Transformation):
 
 
 class Offset(Transformation):
-    def __init__(self, xOffset: int = 0, yOffset: int = 0, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, xOffset: int = 0, yOffset: int = 0, **kwargs):
+        super().__init__(**kwargs)
         self._xOffset = xOffset
         self._yOffset = yOffset
 

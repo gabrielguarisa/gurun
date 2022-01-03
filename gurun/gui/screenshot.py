@@ -34,8 +34,8 @@ class ScreenshotPAG(Node):
 
 
 class ScreenshotMMS(Node):
-    def __init__(self, monitor: int = 0, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, monitor: int = 0, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self._monitor = monitor
 
     def run(self, filename: str = None, *args: Any, **kwargs: Any) -> np.ndarray:

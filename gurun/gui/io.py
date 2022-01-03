@@ -13,23 +13,23 @@ except ImportError:
 
 
 class Typewrite(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.typewrite, *args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(pyautogui.typewrite, **kwargs)
 
 
 class Scroll(Node):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.scroll, *args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(pyautogui.scroll, **kwargs)
 
 
 class Click(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.click, *args, **kwargs)
+        super().__init__(pyautogui.click, **kwargs)
 
 
 class HotKey(WrapperNode):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.hotkey, *args, **kwargs)
+        super().__init__(pyautogui.hotkey, **kwargs)
 
 
 class MoveRel(Node):
@@ -37,10 +37,9 @@ class MoveRel(Node):
         self,
         x: int = 0,
         y: int = 0,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self._x = x
         self._y = y
 
@@ -49,13 +48,13 @@ class MoveRel(Node):
 
 
 class MoveTo(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.moveTo, *args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(pyautogui.moveTo, **kwargs)
 
 
 class DragRel(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(pyautogui.dragRel, *args, **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(pyautogui.dragRel, **kwargs)
 
 
 class MultipleClicks(Click):
@@ -74,10 +73,9 @@ class NaturalClick(Click):
         ],
         minimum_duration: int = 1,
         maximum_duration: int = 1.5,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self._easing_functions = easing_functions
         self._minimum_duration = minimum_duration
         self._maximum_duration = maximum_duration

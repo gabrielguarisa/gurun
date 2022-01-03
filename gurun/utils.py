@@ -6,18 +6,15 @@ import time
 from gurun.node import Node, WrapperNode
 
 
-class Sleep(Node):
-    def __init__(self, interval: int = 5, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
-        self._interval = interval
-
-    def run(self, *args: Any, **kwargs: Any) -> Any:
-        time.sleep(self._interval, *args, **kwargs)
+class Sleep(WrapperNode):
+    def __init__(self, interval: int = 5, **kwargs: Any):
+        super().__init__(time.sleep, **kwargs)
+        self._args_memory = (interval,)
 
 
 class RaiseException(Node):
-    def __init__(self, exception: Exception, *args: Any, **kwargs: Any):
-        super().__init__(default_state=False, *args, **kwargs)
+    def __init__(self, exception: Exception, **kwargs: Any):
+        super().__init__(default_state=False, **kwargs)
         self._exception = exception
 
     def run(self, *args: Any, **kwargs: Any) -> None:
@@ -25,8 +22,8 @@ class RaiseException(Node):
 
 
 class Periodic(Node):
-    def __init__(self, node: Node, interval: int, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, node: Node, interval: int, **kwargs: Any):
+        super().__init__(**kwargs)
         self._node = node
         self._interval = interval
         self._last_run = 0
@@ -50,10 +47,9 @@ class RandomPeriodic(Periodic):
         node: Node,
         min_interval: int,
         max_interval: int,
-        *args: Any,
         **kwargs: Any,
     ):
-        super().__init__(node, 0, *args, **kwargs)
+        super().__init__(node, 0, **kwargs)
         self._min_interval = min_interval
         self._max_interval = max_interval
 
@@ -63,8 +59,8 @@ class RandomPeriodic(Periodic):
 
 
 class Wait(Node):
-    def __init__(self, node: Node, timeout: int, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, node: Node, timeout: int, **kwargs: Any):
+        super().__init__(**kwargs)
         self._node = node
         self._timeout = timeout
 
@@ -81,8 +77,8 @@ class Wait(Node):
 
 
 class NotNode(Node):
-    def __init__(self, node: Node, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def __init__(self, node: Node, **kwargs: Any):
+        super().__init__(**kwargs)
         self._node = node
 
     def run(self, *args: Any, **kwargs: Any) -> bool:
@@ -92,10 +88,8 @@ class NotNode(Node):
 
 
 class While(Node):
-    def __init__(
-        self, trigger: Node, action: Node, timeout: int, *args: Any, **kwargs: Any
-    ):
-        super().__init__(*args, **kwargs)
+    def __init__(self, trigger: Node, action: Node, timeout: int, **kwargs: Any):
+        super().__init__(**kwargs)
         self._trigger = trigger
         self._action = action
         self._timeout = timeout
@@ -113,5 +107,6 @@ class While(Node):
 
 
 class Print(WrapperNode):
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(print, *args, **kwargs)
+    def __init__(self, *values: Any, **kwargs: Any):
+        super().__init__(print, **kwargs)
+        self._args_memory = values
