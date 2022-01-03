@@ -72,6 +72,6 @@ class TemplateDetectionFrom(TemplateDetection):
         self._source_node = source_node
 
     def run(self, *args: Any, **kwargs: Any) -> List[List[int]]:
-        image = self._source_node(*args, **kwargs)
+        image = self._source_node.run(*args, **kwargs)
 
         return super().run(image, *args, **kwargs)

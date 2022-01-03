@@ -11,7 +11,7 @@ class _BaseNode(object):
         *,
         default_output: Any = None,
         default_state: bool = True,
-        verbose: int = 1,
+        verbose: int = None,
         name: str = None,
         ravel: bool = False,
         **memory: Any,
