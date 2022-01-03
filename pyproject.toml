@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gurun"
-version = "1.0.0-alpha2"
+version = "1.0.0"
 description = "Task automation framework"
 authors = ["Gabriel Guarisa <gabrielguarisa@gmail.com>"]
 license = "MIT"
