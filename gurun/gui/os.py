@@ -13,10 +13,15 @@ class Subprocess(WrapperNode):
 
 class Workspace(Subprocess):
     def __init__(self, workspace: str, os: str, **kwargs: Any):
+        if not isinstance(workspace, str):
+            workspace = str(workspace)
+
         if os.lower() == "linux":
             super().__init__("wmctrl", "-s", workspace, **kwargs)
         elif os.lower() == "windows":
             # SOURCE: https://github.com/MScholtes/PSVirtualDesktop
-            super().__init__("Switch-Desktop", workspace, **kwargs)
+            super().__init__(
+                ["powershell", "-Command", "Switch-Desktop", workspace], **kwargs
+            )
         else:
             raise ValueError("Workspace is only available on Linux and Windows")
