@@ -15,5 +15,8 @@ class Workspace(Subprocess):
     def __init__(self, workspace: str, os: str, **kwargs: Any):
         if os.lower() == "linux":
             super().__init__("wmctrl", "-s", workspace, **kwargs)
+        elif os.lower() == "windows":
+            # SOURCE: https://github.com/MScholtes/PSVirtualDesktop
+            super().__init__("Switch-Desktop", workspace, **kwargs)
         else:
-            raise ValueError("Workspace is only available on Linux")
+            raise ValueError("Workspace is only available on Linux and Windows")
