@@ -32,6 +32,28 @@ pip install gurun[cv]
 pip install gurun[gui]
 ```
 
+### Multiple worspaces
+
+For the multi-workspace system to work, install the following libraries on your operating system.
+
+#### Windows
+
+Install [PSVirtualDesktop](https://github.com/MScholtes/PSVirtualDesktop):
+```shell
+PS C:\> Install-Module VirtualDesktop
+```
+
+#### Linux
+
+Install wmctrl:
+```shell
+sudo apt-get install -y wmctrl
+```
+
+## Examples
+
+- [bombcrypto-bot](https://github.com/gabrielguarisa/bombcrypto-bot) - A bot to automate the bombcrypto game.
+
 ## Development
 ### Setting up a development environment
 
@@ -46,7 +68,7 @@ pip install poetry
 Now, initialize poetry and [pre-commit](https://pre-commit.com/) hooks:
 
 ```bash
-make install && make install-pre-commit
+make init
 ```
 
 ### Running tests
@@ -67,7 +89,7 @@ To format the code, you can use the command:
 make formatting
 ```
 
-This will run the [black](https://github.com/psf/black), [isort](https://github.com/PyCQA/isort) and )[pyupgrade](https://github.com/asottile/pyupgrade) commands.
+This will run the [isort](https://github.com/PyCQA/isort)  and [black](https://github.com/psf/black) commands.
 
 If you want to just check the formatting, use the command:
 

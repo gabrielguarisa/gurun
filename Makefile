@@ -1,12 +1,14 @@
 #* Installation
 .PHONY: install
 install:
-	poetry lock -n && poetry export --without-hashes > requirements.txt
 	poetry install -n
 
 .PHONY: install-pre-commit
 install-pre-commit:
 	poetry run pre-commit install
+
+.PHONY: init
+init: install install-pre-commit
 
 #* Formatters
 .PHONY: codestyle
